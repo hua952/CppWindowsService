@@ -21,7 +21,8 @@
 #include <assert.h>
 #include <strsafe.h>
 #pragma endregion
-
+#include <string>
+#include <fstream>
 
 #pragma region Static Members
 
@@ -47,6 +48,24 @@ CServiceBase *CServiceBase::s_service = NULL;
 //
 BOOL CServiceBase::Run(CServiceBase &service)
 {
+	wchar_t szPath[MAX_PATH];
+
+    if (GetModuleFileName(NULL, szPath, ARRAYSIZE(szPath)) == 0)
+    {
+        wprintf(L"GetModuleFileName failed w/err 0x%08lx\n", GetLastError());
+    } else {
+		int wcLen = (int)(wcslen(szPath));
+		for (int i = wcLen - 1; i >= 0; i--) {
+			if (szPath[i] == L'\\' || szPath[i] == L'/') {
+				szPath[i] = 0;
+				break;
+			}
+		}
+		std::wstring wsPath = szPath;
+		wsPath += L"\\serverLog.txt";
+		std::ofstream of(wsPath.c_str());
+		of<<L"server begin"<<std::endl;
+	}
     s_service = &service;
 
     SERVICE_TABLE_ENTRY serviceTable[] = 
